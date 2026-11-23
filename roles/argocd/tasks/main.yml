@@ -1,0 +1,46 @@
+- name: Check argocd namespace exists
+  command: kubectl get namespace argocd
+  register: ns_check
+  ignore_errors: yes
+  changed_when: false
+
+- name: Create argocd namespace if not exists
+  command: kubectl create namespace argocd
+  when: ns_check.rc != 0
+
+- name: Install ArgoCD with server-side apply
+  command: kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --server-side
+  register: argocd_install
+
+- name: Wait for ArgoCD pods to be ready
+  command: kubectl wait --for=condition=ready pod --all -n argocd --timeout=300s
+  retries: 3
+  delay: 10
+
+- name: Check argocd-server service type
+  command: kubectl get svc argocd-server -n argocd -o jsonpath='{.spec.type}'
+  register: svc_type
+  changed_when: false
+
+- name: Expose ArgoCD server as NodePort if not already
+  command: kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "NodePort"}}'
+  when: svc_type.stdout != "NodePort"
+
+- name: Install ArgoCD CLI
+  shell: |
+    curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+    chmod +x /usr/local/bin/argocd
+  args:
+    creates: /usr/local/bin/argocd
+
+- name: Reset ArgoCD admin password
+  shell: kubectl -n argocd patch secret argocd-secret -p '{"stringData": {"admin.password": "{{ argocd_admin_password_bcrypt }}", "admin.passwordMtime": "2026-01-01T00:00:00Z"}}'
+
+- name: Login to ArgoCD
+  shell: argocd login 192.168.0.120:30499 --username admin --password {{ argocd_admin_password }} --insecure
+  changed_when: false
+
+- name: Add GitLab repository to ArgoCD
+  shell: |
+    argocd repo add https://192.168.0.112/root/infra-test.git --username root --password {{ gitlab_token }} --insecure-skip-server-verification
+  ignore_errors: yes

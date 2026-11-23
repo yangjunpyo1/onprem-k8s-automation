@@ -1,0 +1,7 @@
+slack_webhook_url: "{{ vault_slack_webhook_url }}"
+gitlab_token: "{{ vault_gitlab_token }}"
+gitlab_runner_token: "{{ vault_gitlab_runner_token }}"
+kubeadm_join_token: "{{ vault_kubeadm_join_token }}"
+kubeadm_ca_cert_hash: "{{ vault_kubeadm_ca_cert_hash }}"
+argocd_admin_password: "{{ vault_argocd_admin_password }}"
+argocd_admin_password_bcrypt: "{{ vault_argocd_admin_password_bcrypt }}"

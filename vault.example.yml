@@ -1,0 +1,9 @@
+# 비밀 값 예시 파일입니다. 실제 값은 이 파일을 복사해 vault.yml로 만든 뒤
+# ansible-vault encrypt vault.yml 로 암호화해서 사용합니다. (vault.yml은 Git에 올리지 않습니다)
+vault_slack_webhook_url: "https://hooks.slack.com/services/XXXX/XXXX/XXXX"
+vault_gitlab_token: "CHANGE_ME"
+vault_gitlab_runner_token: "glrt-CHANGE_ME"
+vault_kubeadm_join_token: "abcdef.0123456789abcdef"
+vault_kubeadm_ca_cert_hash: "CHANGE_ME_64_HEX"
+vault_argocd_admin_password: "CHANGE_ME"
+vault_argocd_admin_password_bcrypt: "CHANGE_ME_BCRYPT_HASH"
